@@ -1,0 +1,11 @@
+# Default ignored files
+/shelf/
+/workspace.xml
+/sonarlint/
+checkstyle-idea.xml
+compiler.xml
+gradle.xml
+kotlinc.xml
+misc.xml
+inspectionProfiles/
+androidTestResultsUserPreferences.xml
