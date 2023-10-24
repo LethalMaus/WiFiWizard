@@ -14,15 +14,18 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
@@ -38,14 +41,23 @@ fun WiFiListScreen(
 
     val networks = remember { mutableStateListOf<String>() }
 
-    LaunchedEffect(permissionState) {
-        if (permissionState.status.isGranted) {
-            networks.clear()
-            wifiManager.scanResults.distinctBy { it.SSID }.forEach {
-                if (it.SSID.isNotBlank()) networks.add(it.SSID)
+    val lifecycleOwner = LocalLifecycleOwner.current
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) {
+                if (permissionState.status.isGranted) {
+                    networks.clear()
+                    wifiManager.scanResults.distinctBy { it.SSID }.forEach {
+                        if (it.SSID.isNotBlank()) networks.add(it.SSID)
+                    }
+                } else {
+                    permissionState.launchPermissionRequest()
+                }
             }
-        } else {
-            permissionState.launchPermissionRequest()
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)
         }
     }
 
