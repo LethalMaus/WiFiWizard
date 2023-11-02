@@ -29,8 +29,10 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
+import androidx.constraintlayout.compose.Dimension
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
@@ -117,9 +119,12 @@ fun EnterPasswordScreen(
                 text = "Enter the password for $ssid",
                 modifier = Modifier.constrainAs(instructionText) {
                     bottom.linkTo(passwordField.top, margin = 8.dp)
-                    start.linkTo(parent.start, margin = 16.dp)
-                    end.linkTo(parent.end, margin = 16.dp)
-                }
+                    start.linkTo(passwordField.start)
+                    end.linkTo(passwordField.end)
+                    width = Dimension.fillToConstraints
+
+                },
+                textAlign = TextAlign.Center,
             )
         } else {
             Text(

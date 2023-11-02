@@ -109,7 +109,7 @@ class WiFiWizardViewModel : ViewModel() {
     fun isConnected(ssid: String, wifiManager: WifiManager, connectivityManager: ConnectivityManager?) {
         return wifiManager.let { wm ->
             val wifi = connectivityManager?.getNetworkInfo(ConnectivityManager.TYPE_WIFI)
-            val ssidMatch = wm.connectionInfo?.ssid?.replace("\"", "")?.lowercase() == ssid.lowercase()
+            val ssidMatch = wm.connectionInfo?.ssid?.replace("\"", "") == ssid
             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q && wifi?.isConnected == true) {
                 setConnectionState(ConnectionState.CONNECTED)
             } else if (ssidMatch) {
