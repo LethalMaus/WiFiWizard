@@ -22,7 +22,8 @@ The provided solution should be able to handle all, if not most, Android devices
 ## Features
 
 - Connect to a WiFi programmatically
-- Fallback methos & error handling
+- QR code scanning for WiFi details
+- Fallback methods & error handling
 - Jetpack Compose example
 
 ## Getting Started
