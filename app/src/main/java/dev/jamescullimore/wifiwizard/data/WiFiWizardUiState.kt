@@ -12,5 +12,6 @@ enum class ConnectionState {
     CONNECTED,
     SUGGESTED,
     FAILED,
+    QR_SCAN,
     NONE;
 }

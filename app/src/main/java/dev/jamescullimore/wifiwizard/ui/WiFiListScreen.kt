@@ -14,15 +14,18 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
@@ -31,29 +34,38 @@ import com.google.accompanist.permissions.rememberPermissionState
 @Composable
 fun WiFiListScreen(
     onWiFiClicked: (String) -> Unit,
-    onEnterManuallyClicked: () -> Unit
+    onEnterManuallyClicked: () -> Unit,
+    onScanQrCodeClicked: () -> Unit
 ) {
     val wifiManager = LocalContext.current.getSystemService(Context.WIFI_SERVICE) as WifiManager
     val permissionState = rememberPermissionState(Manifest.permission.ACCESS_FINE_LOCATION)
 
     val networks = remember { mutableStateListOf<String>() }
 
-    LaunchedEffect(permissionState) {
-        if (permissionState.status.isGranted) {
-            networks.clear()
-            wifiManager.scanResults.distinctBy { it.SSID }.forEach {
-                if (it.SSID.isNotBlank()) networks.add(it.SSID)
+    val lifecycleOwner = LocalLifecycleOwner.current
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) {
+                if (permissionState.status.isGranted) {
+                    networks.clear()
+                    wifiManager.scanResults.distinctBy { it.SSID }.forEach {
+                        if (it.SSID.isNotBlank()) networks.add(it.SSID)
+                    }
+                } else {
+                    permissionState.launchPermissionRequest()
+                }
             }
-        } else {
-            permissionState.launchPermissionRequest()
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)
         }
     }
 
     ConstraintLayout(
         modifier = Modifier.fillMaxSize()
     ) {
-        val (list, enterManuallyButton) = createRefs()
-
+        val (list, enterManuallyButton, scanQrButton) = createRefs()
 
         LazyColumn(
             modifier = Modifier
@@ -78,11 +90,23 @@ fun WiFiListScreen(
                 .padding(8.dp)
                 .constrainAs(enterManuallyButton) {
                     bottom.linkTo(parent.bottom)
-                    end.linkTo(parent.end)
                     start.linkTo(parent.start)
+                    end.linkTo(scanQrButton.start)
                 },
             onClick = { onEnterManuallyClicked.invoke() }) {
             Text(text = "Enter manually")
+        }
+
+        Button(
+            modifier = Modifier
+                .padding(8.dp)
+                .constrainAs(scanQrButton) {
+                    bottom.linkTo(parent.bottom)
+                    start.linkTo(enterManuallyButton.end)
+                    end.linkTo(parent.end)
+                },
+            onClick = { onScanQrCodeClicked.invoke() }) {
+            Text(text = "Scan QR Code")
         }
     }
 }
