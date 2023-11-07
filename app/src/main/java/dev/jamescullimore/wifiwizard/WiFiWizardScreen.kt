@@ -5,6 +5,7 @@ import android.net.Uri
 import android.provider.Settings
 import android.widget.Toast
 import androidx.annotation.StringRes
+import androidx.camera.core.ExperimentalGetImage
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -27,7 +28,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.core.content.ContextCompat.startActivity
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -37,12 +37,14 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.google.android.gms.oss.licenses.OssLicensesMenuActivity
 import dev.jamescullimore.wifiwizard.ui.EnterPasswordScreen
+import dev.jamescullimore.wifiwizard.ui.QrScannerScreen
 import dev.jamescullimore.wifiwizard.ui.WiFiListScreen
 
 
 enum class WiFiWizardScreen(@StringRes val title: Int, val route: String) {
     WiFiList(title = R.string.app_name, route = "WiFiList"),
-    ConnectToWiFi(title = R.string.connect_to_wifi, route = "ConnectToWiFi/{ssid}");
+    ConnectToWiFi(title = R.string.connect_to_wifi, route = "ConnectToWiFi/{ssid}"),
+    ScanQrCode(title = R.string.scan_qr_code, route = "ScanQrCode");
 
     companion object {
         fun getScreenByRoute(route: String): WiFiWizardScreen {
@@ -51,6 +53,7 @@ enum class WiFiWizardScreen(@StringRes val title: Int, val route: String) {
                 ConnectToWiFi.name,
                 ConnectToWiFi.route,
                 -> ConnectToWiFi
+                ScanQrCode.route -> ScanQrCode
                 else -> throw IllegalArgumentException("Unknown WiFiWizardScreen route: $route")
             }
         }
@@ -109,6 +112,7 @@ fun WiFiWizardAppBar(
     )
 }
 
+@androidx.annotation.OptIn(ExperimentalGetImage::class)
 @Composable
 fun WiFiWizardApp(
     navController: NavHostController = rememberNavController(),
@@ -150,6 +154,9 @@ fun WiFiWizardApp(
                     },
                     onEnterManuallyClicked = {
                         navController.navigate(WiFiWizardScreen.ConnectToWiFi.name)
+                    },
+                    onScanQrCodeClicked = {
+                        navController.navigate(WiFiWizardScreen.ScanQrCode.name)
                     }
                 )
             }
@@ -169,6 +176,16 @@ fun WiFiWizardApp(
             ) {
                 EnterPasswordScreen(
                     chosenSsid = it.arguments?.getString("ssid")!!,
+                    onSuccess = {
+                        navController.navigate(WiFiWizardScreen.WiFiList.route)
+                    },
+                    onGoToSettings = { openSettings() }
+                )
+            }
+            composable(
+                route = WiFiWizardScreen.ScanQrCode.route,
+            ) {
+                QrScannerScreen(
                     onSuccess = {
                         navController.navigate(WiFiWizardScreen.WiFiList.route)
                     },

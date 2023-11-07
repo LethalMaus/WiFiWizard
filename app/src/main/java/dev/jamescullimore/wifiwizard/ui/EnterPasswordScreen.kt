@@ -6,17 +6,10 @@ import android.net.wifi.WifiManager
 import android.os.Build
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.List
-import androidx.compose.material.icons.filled.Warning
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
@@ -45,7 +38,6 @@ fun EnterPasswordScreen(
     onGoToSettings: () -> Unit,
 ) {
     val viewModel: WiFiWizardViewModel = viewModel()
-    var password by remember { mutableStateOf("") }
     var ssid by remember { mutableStateOf(chosenSsid) }
     val showConnectionFailedDialog = remember { mutableStateOf(false) }
     val showConnectionSuccessDialog = remember { mutableStateOf(false) }
@@ -97,12 +89,33 @@ fun EnterPasswordScreen(
         )
     }
 
+    EnterPasswordLayout(
+        viewModel = viewModel,
+        connectionState = uiState.connectionState,
+        ssid = ssid,
+        onSsidChange = { ssid = it },
+        wifiManager = wifiManager,
+        connectivityManager = connectivityManager
+    )
+}
+
+@Composable
+fun EnterPasswordLayout(
+    viewModel: WiFiWizardViewModel,
+    connectionState: ConnectionState?,
+    ssid: String,
+    onSsidChange: (String) -> Unit,
+    wifiManager: WifiManager,
+    connectivityManager: ConnectivityManager?
+) {
+    var password by remember { mutableStateOf("") }
+
     ConstraintLayout(
         modifier = Modifier.fillMaxSize()
     ) {
         val (loader, instructionText, ssidField, passwordField, connectButton, suggestButton) = createRefs()
 
-        if (uiState.connectionState == ConnectionState.CONNECTING) {
+        if (connectionState == ConnectionState.CONNECTING) {
             CircularProgressIndicator(
                 modifier = Modifier.constrainAs(loader) {
                     top.linkTo(parent.top)
@@ -112,7 +125,7 @@ fun EnterPasswordScreen(
                 }
             )
         }
-        if (chosenSsid.isNotBlank()) {
+        if (ssid.isNotBlank()) {
             Text(
                 text = "Enter the password for $ssid",
                 modifier = Modifier.constrainAs(instructionText) {
@@ -132,16 +145,18 @@ fun EnterPasswordScreen(
             )
             OutlinedTextField(
                 value = ssid,
-                onValueChange = { ssid = it },
+                onValueChange = { onSsidChange(it) },
                 label = { Text(text = "SSID") },
-                modifier = Modifier.constrainAs(ssidField) {
-                    bottom.linkTo(passwordField.top, margin = 8.dp)
-                    start.linkTo(parent.start, margin = 16.dp)
-                    end.linkTo(parent.end, margin = 16.dp)
-                }.semantics {
-                    contentDescription = "SSID TextField"
-                },
-                enabled = uiState.connectionState != ConnectionState.CONNECTING,
+                modifier = Modifier
+                    .constrainAs(ssidField) {
+                        bottom.linkTo(passwordField.top, margin = 8.dp)
+                        start.linkTo(parent.start, margin = 16.dp)
+                        end.linkTo(parent.end, margin = 16.dp)
+                    }
+                    .semantics {
+                        contentDescription = "SSID TextField"
+                    },
+                enabled = connectionState != ConnectionState.CONNECTING,
             )
         }
 
@@ -149,15 +164,17 @@ fun EnterPasswordScreen(
             value = password,
             onValueChange = { password = it },
             label = { Text(text = "Password") },
-            modifier = Modifier.constrainAs(passwordField) {
-                top.linkTo(parent.top)
-                start.linkTo(parent.start, margin = 16.dp)
-                end.linkTo(parent.end, margin = 16.dp)
-                bottom.linkTo(parent.bottom)
-            }.semantics {
-                contentDescription = "Password TextField"
-            },
-            enabled = uiState.connectionState != ConnectionState.CONNECTING
+            modifier = Modifier
+                .constrainAs(passwordField) {
+                    top.linkTo(parent.top)
+                    start.linkTo(parent.start, margin = 16.dp)
+                    end.linkTo(parent.end, margin = 16.dp)
+                    bottom.linkTo(parent.bottom)
+                }
+                .semantics {
+                    contentDescription = "Password TextField"
+                },
+            enabled = connectionState != ConnectionState.CONNECTING
         )
 
         Button(
@@ -170,7 +187,7 @@ fun EnterPasswordScreen(
             onClick = {
                 viewModel.connectToWiFi(wifiManager, connectivityManager, ssid, password)
             },
-            enabled = ssid.isNotBlank() && uiState.connectionState != ConnectionState.CONNECTING
+            enabled = ssid.isNotBlank() && connectionState != ConnectionState.CONNECTING
         ) {
             Text(text = "Connect")
         }
@@ -185,107 +202,10 @@ fun EnterPasswordScreen(
                 onClick = {
                     viewModel.suggestWiFi(wifiManager, ssid, password)
                 },
-                enabled = ssid.isNotBlank() && uiState.connectionState != ConnectionState.CONNECTING
+                enabled = ssid.isNotBlank() && connectionState != ConnectionState.CONNECTING
             ) {
                 Text(text = "Suggest")
             }
         }
     }
-}
-
-@Composable
-fun ConnectionFailedDialog (
-    onConnectViaSettings: () -> Unit,
-    onDismissRequest: () -> Unit,
-) {
-    AlertDialog(
-        icon = {
-            Icon(Icons.Default.Warning, contentDescription = "Warning")
-        },
-        title = {
-            Text(text = "Connection Failed")
-        },
-        text = {
-            Text(text = "Could not connect to the provided WiFi. Please make sure the password is correct and try again.")
-        },
-        onDismissRequest = {
-            onDismissRequest()
-        },
-        confirmButton = {
-            TextButton(
-                onClick = {
-                    onConnectViaSettings()
-                }
-            ) {
-                Text("Connect via Settings")
-            }
-        },
-        dismissButton = {
-            TextButton(
-                onClick = {
-                    onDismissRequest()
-                }
-            ) {
-                Text("OK")
-            }
-        }
-    )
-}
-
-@Composable
-fun ConnectionSuccessDialog (
-    onDismissRequest: () -> Unit,
-) {
-    AlertDialog(
-        icon = {
-            Icon(Icons.Default.Check, contentDescription = "Warning")
-        },
-        title = {
-            Text(text = "Connection Successful")
-        },
-        text = {
-            Text(text = "Your WiFi connection was successful.")
-        },
-        onDismissRequest = {
-            onDismissRequest()
-        },
-        confirmButton = {
-            TextButton(
-                onClick = {
-                    onDismissRequest()
-                }
-            ) {
-                Text("OK")
-            }
-        }
-    )
-}
-
-@Composable
-fun ConnectionSuggestedDialog (
-    onDismissRequest: () -> Unit,
-) {
-    AlertDialog(
-        icon = {
-            Icon(Icons.Default.List, contentDescription = "Warning")
-        },
-        title = {
-            Text(text = "WiFI Suggested")
-        },
-        text = {
-            Text(text = "Your WiFi was suggested, check your settings to confirm if automatic connections will be made.")
-        },
-        onDismissRequest = {
-            onDismissRequest()
-        },
-        confirmButton = {
-            TextButton(
-                onClick = {
-                    onDismissRequest()
-                }
-            ) {
-                Text("OK")
-            }
-        }
-    )
 }

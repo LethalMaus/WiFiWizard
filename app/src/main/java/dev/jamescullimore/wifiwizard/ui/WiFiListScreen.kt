@@ -34,7 +34,8 @@ import com.google.accompanist.permissions.rememberPermissionState
 @Composable
 fun WiFiListScreen(
     onWiFiClicked: (String) -> Unit,
-    onEnterManuallyClicked: () -> Unit
+    onEnterManuallyClicked: () -> Unit,
+    onScanQrCodeClicked: () -> Unit
 ) {
     val wifiManager = LocalContext.current.getSystemService(Context.WIFI_SERVICE) as WifiManager
     val permissionState = rememberPermissionState(Manifest.permission.ACCESS_FINE_LOCATION)
@@ -64,8 +65,7 @@ fun WiFiListScreen(
     ConstraintLayout(
         modifier = Modifier.fillMaxSize()
     ) {
-        val (list, enterManuallyButton) = createRefs()
-
+        val (list, enterManuallyButton, scanQrButton) = createRefs()
 
         LazyColumn(
             modifier = Modifier
@@ -90,11 +90,23 @@ fun WiFiListScreen(
                 .padding(8.dp)
                 .constrainAs(enterManuallyButton) {
                     bottom.linkTo(parent.bottom)
-                    end.linkTo(parent.end)
                     start.linkTo(parent.start)
+                    end.linkTo(scanQrButton.start)
                 },
             onClick = { onEnterManuallyClicked.invoke() }) {
             Text(text = "Enter manually")
+        }
+
+        Button(
+            modifier = Modifier
+                .padding(8.dp)
+                .constrainAs(scanQrButton) {
+                    bottom.linkTo(parent.bottom)
+                    start.linkTo(enterManuallyButton.end)
+                    end.linkTo(parent.end)
+                },
+            onClick = { onScanQrCodeClicked.invoke() }) {
+            Text(text = "Scan QR Code")
         }
     }
 }

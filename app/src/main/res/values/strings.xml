@@ -1,6 +1,7 @@
 <resources>
     <string name="app_name">WiFiWizard</string>
     <string name="connect_to_wifi">Connect to WiFi</string>
+    <string name="scan_qr_code">Scan QR Code</string>
     <string name="back_button">Back</string>
     <string name="cant_open_wifi_settings">Can\'t open wifi settings</string>
 </resources>
