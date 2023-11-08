@@ -5,6 +5,7 @@ import android.net.ConnectivityManager
 import android.net.wifi.WifiManager
 import android.os.Build
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
@@ -115,7 +116,7 @@ fun EnterPasswordLayout(
     ConstraintLayout(
         modifier = Modifier.fillMaxSize()
     ) {
-        val (loader, instructionText, ssidField, passwordField, connectButton, suggestButton) = createRefs()
+        val (loader, instructionText, ssidField, passwordField, connectButton, suggestButton, banner) = createRefs()
 
         if (connectionState == ConnectionState.CONNECTING) {
             CircularProgressIndicator(
@@ -212,5 +213,11 @@ fun EnterPasswordLayout(
                 Text(text = "Suggest")
             }
         }
+
+        AdmobBanner(modifier = Modifier
+            .fillMaxWidth()
+            .constrainAs(banner) {
+                bottom.linkTo(parent.bottom)
+            })
     }
 }

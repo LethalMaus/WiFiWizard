@@ -29,13 +29,20 @@ android {
         debug {
             buildConfigField("String", "SSID", gradleLocalProperties(rootDir).getProperty("SSID"))
             buildConfigField("String", "PASS", gradleLocalProperties(rootDir).getProperty("PASS"))
+            resValue("string", "ADMOB_ID", "\"ca-app-pub-3940256099942544~3347511713\"")
+            buildConfigField("String", "BANNER_AD", "\"ca-app-pub-3940256099942544/6300978111\"")
+            buildConfigField("String", "REWARD_AD", "\"ca-app-pub-3940256099942544/5224354917\"")
         }
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            resValue("string", "ADMOB_ID", gradleLocalProperties(rootDir).getProperty("ADMOB_ID"))
+            buildConfigField("String", "BANNER_AD", gradleLocalProperties(rootDir).getProperty("BANNER_AD"))
+            buildConfigField("String", "REWARD_AD", gradleLocalProperties(rootDir).getProperty("REWARD_AD"))
+            signingConfig = signingConfigs.getByName("debug")
         }
     }
     compileOptions {
@@ -81,6 +88,7 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-viewmodel-savedstate:2.6.2")
     implementation("androidx.navigation:navigation-compose:2.7.5")
     implementation("com.google.accompanist:accompanist-permissions:0.33.2-alpha")
+    implementation("com.google.android.gms:play-services-ads:22.5.0")
     implementation("com.google.android.gms:play-services-oss-licenses:17.0.1")
     implementation(platform("com.google.firebase:firebase-bom:32.4.0"))
     implementation("com.google.firebase:firebase-crashlytics-ktx")

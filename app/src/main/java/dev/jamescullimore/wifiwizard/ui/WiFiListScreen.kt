@@ -65,7 +65,7 @@ fun WiFiListScreen(
     ConstraintLayout(
         modifier = Modifier.fillMaxSize()
     ) {
-        val (list, enterManuallyButton, scanQrButton) = createRefs()
+        val (list, enterManuallyButton, scanQrButton, banner) = createRefs()
 
         LazyColumn(
             modifier = Modifier
@@ -74,7 +74,7 @@ fun WiFiListScreen(
                     top.linkTo(parent.top)
                     end.linkTo(parent.end)
                     start.linkTo(parent.start)
-                    bottom.linkTo(enterManuallyButton.top)
+                    bottom.linkTo(banner.top)
                     height = Dimension.fillToConstraints
                 },
             contentPadding = PaddingValues(16.dp),
@@ -84,6 +84,12 @@ fun WiFiListScreen(
                 WifiNetworkItem(network, onWiFiClicked)
             }
         }
+
+        AdmobBanner(modifier = Modifier
+            .fillMaxWidth()
+            .constrainAs(banner) {
+                bottom.linkTo(enterManuallyButton.top)
+            })
 
         Button(
             modifier = Modifier

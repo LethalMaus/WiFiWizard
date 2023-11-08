@@ -1,6 +1,11 @@
 # WiFiWizard
 
-This demo app showcases how to connect to a WiFi programmatically and appropriate error handling.
+This demo app showcases the following:
+
+- How to connect to a WiFi programmatically and appropriate error handling
+- How to scan a QR Code using ML Kit
+- How to show adverts using AdMob
+
 The app is done completely in Jetpack Compose with an example espresso UI test.
 
 ## Table of Contents
@@ -24,6 +29,8 @@ The provided solution should be able to handle all, if not most, Android devices
 - Connect to a WiFi programmatically
 - QR code scanning for WiFi details
 - Fallback methods & error handling
+- Links to source code & articles
+- AdMob example
 - Jetpack Compose example
 
 ## Getting Started
@@ -49,6 +56,14 @@ To get started with WiFiWizard, follow the instructions below.
 ## Configuration
 
 Before running the instrumented test, you need to add a known SSID & password to the project. In local.properties add `SSID="YOUR_SSID_NAME"` and `PASS="YOUR_SSID_PASSWORD"` and change the values accordingly.
+
+Before running the release build you will need to register an account on AdMob and add the appropriate IDs to local.properties.
+
+`
+ADMOB_ID="ca-app-pub-3940256099942544~3347511713"
+BANNER_AD="ca-app-pub-3940256099942544/6300978111"
+REWARD_AD="ca-app-pub-3940256099942544/5224354917"
+`
 
 ## Contributing
 Contributions are welcome! If you encounter any issues or have suggestions for improvements, please feel free to submit a pull request or open an issue in the repository.

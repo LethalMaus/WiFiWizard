@@ -39,6 +39,7 @@ import com.google.android.gms.oss.licenses.OssLicensesMenuActivity
 import dev.jamescullimore.wifiwizard.ui.EnterPasswordScreen
 import dev.jamescullimore.wifiwizard.ui.QrScannerScreen
 import dev.jamescullimore.wifiwizard.ui.WiFiListScreen
+import dev.jamescullimore.wifiwizard.util.RewardedAdLoader
 
 
 enum class WiFiWizardScreen(@StringRes val title: Int, val route: String) {
@@ -70,6 +71,8 @@ fun WiFiWizardAppBar(
 ) {
     var showMenu by remember { mutableStateOf(false) }
     val context = LocalContext.current
+
+    RewardedAdLoader.loadRewardedAd(context)
 
     TopAppBar(
         title = { Text(stringResource(currentScreen.title)) },
@@ -106,6 +109,23 @@ fun WiFiWizardAppBar(
                 }, onClick = {
                     val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/LethalMaus/WiFiWizard"))
                     context.startActivity(browserIntent)
+                })
+                DropdownMenuItem(text = {
+                    Text(text = "StackOverflow")
+                }, onClick = {
+                    val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse("https://stackoverflow.com/questions/63124728/connect-to-wifi-in-android-q-programmatically/65327716#65327716"))
+                    context.startActivity(browserIntent)
+                })
+                DropdownMenuItem(text = {
+                    Text(text = "Article")
+                }, onClick = {
+                    val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse("https://levelup.gitconnected.com/wifi-wizardry-a-developers-guide-to-android-network-magic-4f0f81c612d3"))
+                    context.startActivity(browserIntent)
+                })
+                DropdownMenuItem(text = {
+                    Text(text = "Watch Advert")
+                }, onClick = {
+                    RewardedAdLoader.showRewardedAd(context as MainActivity)
                 })
             }
         }
