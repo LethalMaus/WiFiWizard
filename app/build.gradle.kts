@@ -42,7 +42,6 @@ android {
             resValue("string", "ADMOB_ID", gradleLocalProperties(rootDir).getProperty("ADMOB_ID"))
             buildConfigField("String", "BANNER_AD", gradleLocalProperties(rootDir).getProperty("BANNER_AD"))
             buildConfigField("String", "REWARD_AD", gradleLocalProperties(rootDir).getProperty("REWARD_AD"))
-            signingConfig = signingConfigs.getByName("debug")
         }
     }
     compileOptions {
