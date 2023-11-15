@@ -9,3 +9,5 @@ kotlinc.xml
 misc.xml
 inspectionProfiles/
 androidTestResultsUserPreferences.xml
+/markdown-navigator.xml
+/markdown-navigator-enh.xml

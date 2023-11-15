@@ -1,5 +1,10 @@
 # WiFiWizard
 
+<p align="center">
+  <img src="https://lethalmaus.github.io/WiFiWizard/assets/banner.jpg"><br>
+  <b>A coding example of programmatic WiFi connections, QR scanning & advertising.</b>
+</p>
+
 This demo app showcases the following:
 
 - How to connect to a WiFi programmatically and appropriate error handling
@@ -22,7 +27,18 @@ The app is done completely in Jetpack Compose with an example espresso UI test.
 ## Introduction
 
 Connecting to a WiFi programmatically can be a bit of a challenge and some Android 10 kernals are unfortunately not able to handle it correctly.
-The provided solution should be able to handle all, if not most, Android devices and provideds an appropriate error handling and fallback method to maintain a high UX value.
+The provided solution should be able to handle all, if not most, Android devices and provides an appropriate error handling and fallback method to maintain a high UX value.
+
+<p align="center">
+  <img src="https://lethalmaus.github.io/WiFiWizard/assets/screenshot1.png" height="300">
+  <img src="https://lethalmaus.github.io/WiFiWizard/assets/screenshot2.png" height="300">
+  <img src="https://lethalmaus.github.io/WiFiWizard/assets/screenshot3.png" height="300">
+  <img src="https://lethalmaus.github.io/WiFiWizard/assets/screenshot4.png" height="300">
+</p>
+
+<p align="center">
+  <a href='https://play.google.com/store/apps/details?id=dev.jamescullimore.wifiwizard'><img height='150px' alt='Get it on Google Play' src='https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png'/></a>
+</p>
 
 ## Features
 
