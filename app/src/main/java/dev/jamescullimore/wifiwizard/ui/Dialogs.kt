@@ -2,6 +2,7 @@ package dev.jamescullimore.wifiwizard.ui
 
 import android.os.Build
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.Warning
@@ -85,7 +86,7 @@ fun ConnectionSuggestedDialog (
 ) {
     AlertDialog(
         icon = {
-            Icon(Icons.Default.List, contentDescription = "WiFI Suggested")
+            Icon(Icons.AutoMirrored.Filled.List, contentDescription = "WiFI Suggested")
         },
         title = {
             Text(text = "WiFI Suggested")
@@ -116,7 +117,7 @@ fun SelectConnectionTypeDialog (
 ) {
     AlertDialog(
         icon = {
-            Icon(Icons.Default.List, contentDescription = "Select connection type")
+            Icon(Icons.AutoMirrored.Filled.List, contentDescription = "Select connection type")
         },
         title = {
             Text(text = "Select Connection Type")
