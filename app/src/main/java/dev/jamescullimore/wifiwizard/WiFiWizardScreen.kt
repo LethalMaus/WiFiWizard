@@ -9,7 +9,6 @@ import androidx.camera.core.ExperimentalGetImage
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -27,6 +26,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavHostController
@@ -41,6 +41,7 @@ import dev.jamescullimore.wifiwizard.ui.EnterPasswordScreen
 import dev.jamescullimore.wifiwizard.ui.QrScannerScreen
 import dev.jamescullimore.wifiwizard.ui.WiFiListScreen
 import dev.jamescullimore.wifiwizard.util.RewardedAdLoader
+import androidx.core.net.toUri
 
 
 enum class WiFiWizardScreen(@StringRes val title: Int, val route: String) {
@@ -77,8 +78,12 @@ fun WiFiWizardAppBar(
 
     TopAppBar(
         title = { Text(stringResource(currentScreen.title)) },
-        colors = TopAppBarDefaults.mediumTopAppBarColors(
-            containerColor = MaterialTheme.colorScheme.primaryContainer
+        colors = TopAppBarDefaults.topAppBarColors(
+            containerColor = MaterialTheme.colorScheme.primaryContainer,
+            scrolledContainerColor = Color.Unspecified,
+            navigationIconContentColor = Color.Unspecified,
+            titleContentColor = Color.Unspecified,
+            actionIconContentColor = Color.Unspecified
         ),
         modifier = modifier,
         navigationIcon = {
@@ -108,19 +113,22 @@ fun WiFiWizardAppBar(
                 DropdownMenuItem(text = {
                     Text(text = "Source Code")
                 }, onClick = {
-                    val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/LethalMaus/WiFiWizard"))
+                    val browserIntent = Intent(Intent.ACTION_VIEW,
+                        "https://github.com/LethalMaus/WiFiWizard".toUri())
                     context.startActivity(browserIntent)
                 })
                 DropdownMenuItem(text = {
                     Text(text = "StackOverflow")
                 }, onClick = {
-                    val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse("https://stackoverflow.com/questions/63124728/connect-to-wifi-in-android-q-programmatically/65327716#65327716"))
+                    val browserIntent = Intent(Intent.ACTION_VIEW,
+                        "https://stackoverflow.com/questions/63124728/connect-to-wifi-in-android-q-programmatically/65327716#65327716".toUri())
                     context.startActivity(browserIntent)
                 })
                 DropdownMenuItem(text = {
                     Text(text = "Article")
                 }, onClick = {
-                    val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse("https://levelup.gitconnected.com/wifi-wizardry-a-developers-guide-to-android-network-magic-4f0f81c612d3"))
+                    val browserIntent = Intent(Intent.ACTION_VIEW,
+                        "https://levelup.gitconnected.com/wifi-wizardry-a-developers-guide-to-android-network-magic-4f0f81c612d3".toUri())
                     context.startActivity(browserIntent)
                 })
                 DropdownMenuItem(text = {
@@ -147,7 +155,7 @@ fun WiFiWizardApp(
     fun openSettings() {
         try {
             context.startActivity(Intent(Settings.ACTION_WIFI_SETTINGS))
-        } catch (ex: RuntimeException) {
+        } catch (_: RuntimeException) {
             Toast.makeText(context, R.string.cant_open_wifi_settings, Toast.LENGTH_SHORT).show()
         }
     }

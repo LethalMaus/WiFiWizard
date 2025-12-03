@@ -12,6 +12,7 @@ import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.lifecycle.ViewModel
 import dev.jamescullimore.wifiwizard.data.ConnectionState
+import dev.jamescullimore.wifiwizard.data.SecurityType
 import dev.jamescullimore.wifiwizard.data.WiFiWizardUiState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -79,30 +80,69 @@ class WiFiWizardViewModel : ViewModel() {
         return callback
     }
 
-    fun connectToWiFi(wifiManager: WifiManager, connectivityManager: ConnectivityManager?, ssid: String, password: String) {
+    fun connectToWiFi(
+        wifiManager: WifiManager,
+        connectivityManager: ConnectivityManager?,
+        ssid: String,
+        password: String,
+        security: SecurityType = SecurityType.UNKNOWN
+    ) {
         setConnectionState(ConnectionState.CONNECTING)
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
-            wifiManager.let {
-                val conf = WifiConfiguration()
-                conf.SSID = "\"$ssid\""
-                conf.preSharedKey = "\"${password}\""
-                connectToNetworkId(wifiManager, it.addNetwork(conf))
-            }
-        } else {
-            val wifiNetworkSpecifier = WifiNetworkSpecifier.Builder().apply {
-                setSsid(ssid)
-                setWpa2Passphrase(password)
-            }.build()
+        try {
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
+                wifiManager.let {
+                    val conf = WifiConfiguration()
+                    conf.SSID = "\"$ssid\""
+                    conf.preSharedKey = "\"${password}\""
+                    connectToNetworkId(wifiManager, it.addNetwork(conf))
+                }
+            } else {
+                val wifiNetworkSpecifier = WifiNetworkSpecifier.Builder().apply {
+                    when (security) {
+                        SecurityType.WEP -> {
+                            setConnectionState(ConnectionState.FAILED)
+                        }
 
-            val networkRequest = NetworkRequest.Builder().apply {
-                addTransportType(NetworkCapabilities.TRANSPORT_WIFI)
-                removeCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
-                setNetworkSpecifier(wifiNetworkSpecifier)
-            }.build()
+                        SecurityType.WPA,
+                        SecurityType.WPA2,
+                        SecurityType.UNKNOWN -> {
+                            val pass = password.takeIf { it.isNotBlank() }
+                            if (pass != null) {
+                                setWpa2Passphrase(pass)
+                            }
+                        }
 
-            getNetworkCallback(connectivityManager).let {
-                connectivityManager?.requestNetwork(networkRequest!!, it)
+                        SecurityType.WPA3 -> {
+                            val pass = password.takeIf { it.isNotBlank() }
+                            if (pass != null) {
+                                try {
+                                    setWpa3Passphrase(pass)
+                                } catch (_: Throwable) {
+                                    setWpa2Passphrase(pass)
+                                }
+                            } else {
+                                setConnectionState(ConnectionState.FAILED)
+                            }
+                        }
+
+                        else -> {
+                            // do nothing
+                        }
+                    }
+                }.build()
+
+                val networkRequest = NetworkRequest.Builder().apply {
+                    addTransportType(NetworkCapabilities.TRANSPORT_WIFI)
+                    removeCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
+                    setNetworkSpecifier(wifiNetworkSpecifier)
+                }.build()
+
+                getNetworkCallback(connectivityManager).let {
+                    connectivityManager?.requestNetwork(networkRequest!!, it)
+                }
             }
+        } catch (_: Exception) {
+            setConnectionState(ConnectionState.FAILED)
         }
     }
 
@@ -119,15 +159,64 @@ class WiFiWizardViewModel : ViewModel() {
     }
 
     @RequiresApi(Build.VERSION_CODES.Q)
-    fun suggestWiFi(wifiManager: WifiManager, ssid: String, password: String) {
-        val suggestion: WifiNetworkSuggestion = WifiNetworkSuggestion.Builder()
-            .setSsid(ssid)
-            .setWpa2Passphrase(password)
-            .build()
+    fun suggestWiFi(
+        wifiManager: WifiManager,
+        ssid: String,
+        password: String,
+        security: SecurityType = SecurityType.UNKNOWN
+    ) {
+        try {
+            val builder = WifiNetworkSuggestion.Builder()
+                .setSsid(ssid)
 
-        val suggestionsList: List<WifiNetworkSuggestion> = listOf(suggestion)
+            val validSuggestion = when (security) {
+                SecurityType.OPEN -> {
+                    true
+                }
 
-        wifiManager.addNetworkSuggestions(suggestionsList)
-        setConnectionState(ConnectionState.SUGGESTED)
+                SecurityType.WEP -> {
+                    setConnectionState(ConnectionState.FAILED)
+                    false
+                }
+
+                SecurityType.WPA,
+                SecurityType.WPA2,
+                SecurityType.UNKNOWN -> {
+                    val pass = password.takeIf { it.isNotBlank() }
+                    if (pass != null) {
+                        builder.setWpa2Passphrase(pass)
+                        true
+                    } else {
+                        security == SecurityType.UNKNOWN
+                    }
+                }
+
+                SecurityType.WPA3 -> {
+                    val pass = password.takeIf { it.isNotBlank() }
+                    if (pass != null) {
+                        try {
+                            builder.setWpa3Passphrase(pass)
+                            true
+                        } catch (_: Throwable) {
+                            builder.setWpa2Passphrase(pass)
+                            true
+                        }
+                    } else {
+                        setConnectionState(ConnectionState.FAILED)
+                        false
+                    }
+                }
+            }
+
+            if (!validSuggestion) return
+
+            val suggestion = builder.build()
+            val suggestionsList: List<WifiNetworkSuggestion> = listOf(suggestion)
+
+            wifiManager.addNetworkSuggestions(suggestionsList)
+            setConnectionState(ConnectionState.SUGGESTED)
+        } catch (_: Exception) {
+            setConnectionState(ConnectionState.FAILED)
+        }
     }
 }

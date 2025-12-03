@@ -15,3 +15,5 @@ enum class ConnectionState {
     QR_SCAN,
     NONE;
 }
+
+enum class SecurityType { OPEN, WEP, WPA, WPA2, WPA3, UNKNOWN }
